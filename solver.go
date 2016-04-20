@@ -9,6 +9,7 @@ import (
 var (
 	ErrIncorrectLength   = errors.New("Grid is incorrect length")
 	ErrInvalidCharacters = errors.New("Grid contains invalid characters")
+	ErrDuplicateValues   = errors.New("Invalid puzzle - rows/columns/sectors contain duplicate values")
 )
 
 func isValidGrid(gridInput string) error {
@@ -27,55 +28,105 @@ func validChars(gridInput string) error {
 }
 
 type Grid struct {
-	Squares []Square
+	Squares [][]SquareVal
 }
 
-type Square struct {
-	Row    int
-	Column int
-	Value  int
-}
+type SquareVal int
 
 func transformIntoGrid(gridInput string) (*Grid, error) {
 	g := Grid{
-		Squares: []Square{},
+		Squares: [][]SquareVal{},
 	}
-	g.addSquares(gridInput)
-	g.addRowsAndColumns()
+	err := g.addRows(gridInput)
+	if err != nil {
+		return nil, err
+	}
+	err = g.checkForDuplicates()
+	if err != nil {
+		return nil, err
+	}
 	return &g, nil
 }
 
-func (g *Grid) addSquares(gridInput string) error {
-	for _, val := range gridInput {
-		v, err := strconv.Atoi(string(val))
-		if err != nil {
-			return ErrInvalidCharacters
+func (g *Grid) addRows(gridInput string) error {
+	for i := 0; i < len(gridInput); i += 9 {
+		row := []SquareVal{}
+		for j := i; j < (i + 9); j++ {
+			v, err := strconv.Atoi(string(gridInput[j]))
+			if err != nil {
+				return err
+			}
+			row = append(row, SquareVal(v))
 		}
-		g.Squares = append(g.Squares, Square{
-			Value: v,
-		})
+		g.Squares = append(g.Squares, row)
 	}
 	return nil
 }
 
-func (g *Grid) addRowsAndColumns() {
-	rowNum := 0
-	for i := 0; i < len(g.Squares); i += 9 {
-		colNum := 0
-		for j := i; j < (i + 8); j++ {
-			g.addRow(j, rowNum)
-			g.addColumn(j, colNum)
-			colNum++
+type SelectionType int
+
+const (
+	ColSelection SelectionType = iota
+	RowSelection
+	SubMatrixSelection
+)
+
+func (g *Grid) getSelection(stype SelectionType, Location int) []SquareVal {
+	selection := []SquareVal{}
+	if stype == ColSelection {
+		for _, s := range g.Squares {
+			selection = append(selection, s[Location])
 		}
-		rowNum++
+	} else if stype == RowSelection {
+		selection = g.Squares[Location]
+
+	} else {
+		selection = g.subMatrixes()[Location]
 	}
-	return
+	return selection
 }
 
-func (g *Grid) addRow(pos, rowNum int) {
-	g.Squares[pos].Row = rowNum
+func (g *Grid) checkForDuplicates() error {
+	for i := 0; i < 8; i++ {
+		c := g.getSelection(ColSelection, i)
+		if hasDuplicateSquares(c) {
+			return ErrDuplicateValues
+		}
+		r := g.getSelection(RowSelection, i)
+		if hasDuplicateSquares(r) {
+			return ErrDuplicateValues
+		}
+		m := g.getSelection(SubMatrixSelection, i)
+		if hasDuplicateSquares(m) {
+			return ErrDuplicateValues
+		}
+	}
+	return nil
 }
 
-func (g *Grid) addColumn(pos, colNum int) {
-	g.Squares[pos].Column = colNum
+func hasDuplicateSquares(squares []SquareVal) bool {
+	for i, s := range squares {
+		if s != 0 {
+			for j := i + 1; j < len(squares); j++ {
+				if s == squares[j] {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (g *Grid) subMatrixes() [][]SquareVal {
+	sm := make([][]SquareVal, 9)
+	for i := 0; i < len(sm); i += 3 {
+		for j, _ := range g.Squares {
+			if j >= i && j < i+3 {
+				sm[i] = append(sm[i], g.Squares[j][0:2]...)
+				sm[i+1] = append(sm[i], g.Squares[j][3:5]...)
+				sm[i+2] = append(sm[i], g.Squares[j][6:8]...)
+			}
+		}
+	}
+	return sm
 }

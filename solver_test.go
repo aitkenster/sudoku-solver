@@ -18,7 +18,7 @@ func TestIsValidGrid(t *testing.T) {
 			"123456789123456789123456789123456789123456789123456789123456789123456789123456789",
 			nil,
 		}, {
-			"1 34567891 3456789123  67 9123456789123456789123456789123456789123456789123456789",
+			"103456789103456789123006709123456789123456789123456789123456789123456789123456789",
 			nil,
 		},
 	}
@@ -33,24 +33,32 @@ func TestIsValidGrid(t *testing.T) {
 }
 
 func TestTransformIntoGrid(t *testing.T) {
-	gridInput := "123456789123456789123456789123456789123456789123456789123456789123456789123456789"
-	grid, err := transformIntoGrid(gridInput)
+	gridInput := "102004070000902800009003004000240006000107000400068000200800700007501000080400109"
+	valGrid, err := transformIntoGrid(gridInput)
 	if err != nil {
 		t.Fatalf("expected valid grid, got %#v", err)
 	}
 
-	if len(grid.Squares) != len(gridInput) {
-		t.Errorf("expected grid to contain %#v squares, instead got %#v", len(gridInput), len(grid.Squares))
+	if len(valGrid.Squares) != len(gridInput)/9 {
+		t.Errorf("expected grid to contain %#v squares, instead got %#v", len(gridInput)/9, len(valGrid.Squares))
 	}
 
-	expected := Square{
-		Row:    1,
-		Column: 1,
-		Value:  2,
+	expected := SquareVal(0)
+
+	if valGrid.Squares[0][4] != expected {
+		t.Errorf("expected square to equal %#v, instead got %#v", expected, valGrid.Squares[0][4])
 	}
 
-	if grid.Squares[10] != expected {
-		t.Errorf("expected square to equal %#v, instead got %#v", expected, grid.Squares[10])
+	invalidGrids := []string{
+		"123456789123456789123456789123456789123456789123456789123456789123456789123456789", // duplicate values in column
+		"112004070000902800009003004000240006000107000400068000200800700007501000080400109", //duplicate values in row
+		"102004070010902800009003004000240006000107000400068000200800700007501000080400109", //duplicate values in sector
 	}
 
+	for _, input := range invalidGrids {
+		_, err = transformIntoGrid(input)
+		if err == nil {
+			t.Fatalf("expected %#v, got %#v", ErrDuplicateValues, nil)
+		}
+	}
 }
