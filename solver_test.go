@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func TestIsValidGrid(t *testing.T) {
+func TestValidGrid(t *testing.T) {
 	tests := []struct {
 		grid     string
 		expected error
@@ -24,7 +24,7 @@ func TestIsValidGrid(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := isValidGrid(test.grid)
+		actual := Valid(test.grid)
 		if actual != test.expected {
 			t.Errorf("expected %b for grid %#v, but got %b",
 				test.expected, test.grid, actual)
@@ -39,14 +39,14 @@ func TestTransformIntoGrid(t *testing.T) {
 		t.Fatalf("expected valid grid, got %#v", err)
 	}
 
-	if len(valGrid.Squares) != len(gridInput)/9 {
-		t.Errorf("expected grid to contain %#v squares, instead got %#v", len(gridInput)/9, len(valGrid.Squares))
+	if len(valGrid.Cells) != len(gridInput)/9 {
+		t.Errorf("expected grid to contain %#v squares, instead got %#v", len(gridInput)/9, len(valGrid.Cells))
 	}
 
-	expected := SquareVal(0)
+	expected := 0
 
-	if valGrid.Squares[0][4] != expected {
-		t.Errorf("expected square to equal %#v, instead got %#v", expected, valGrid.Squares[0][4])
+	if valGrid.Cells[0][4] != expected {
+		t.Errorf("expected square to equal %#v, instead got %#v", expected, valGrid.Cells[0][4])
 	}
 
 	invalidGrids := []string{
@@ -61,4 +61,23 @@ func TestTransformIntoGrid(t *testing.T) {
 			t.Fatalf("expected %#v, got %#v", ErrDuplicateValues, nil)
 		}
 	}
+}
+
+func TestSimpleSolve(t *testing.T) {
+	gridInput := "000008070060003090092000058400760000001004000000200000100807000003090000500006400"
+	valGrid, err := transformIntoGrid(gridInput)
+	if err != nil {
+		t.Fatalf("expected valid grid, got:", err)
+	}
+	expected := "315928674864573192792641358438769521251384967976215843149857236683492715527136489"
+
+	actual, err := valGrid.simpleSolve()
+	if err != nil {
+		t.Fatalf("expected solution, got:", err)
+	}
+
+	if actual != expected {
+		t.Fatalf("expected %#v, got %#v", expected, actual)
+	}
+
 }
