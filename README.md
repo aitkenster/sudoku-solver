@@ -2,13 +2,13 @@
 
 Uses recursive backtracking to solve puzzles.
 
-##Technologies used
+###Technologies used
 
 Golang(core packages)
 
 git clone https://github.com/aitkenster/sudoku-solver.git
 
-##How to run it
+###How to run it
 
 [install Go](https://golang.org/doc/install)
 
@@ -36,4 +36,7 @@ Solution...
  8 2 6 3 9 7 5 4 1
  ```
 
+To run the tests:
+
+`go test`
  
