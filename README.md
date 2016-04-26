@@ -1,6 +1,6 @@
 #Sudoku Solver
 
-Uses the recursive backtracking algorithm to solve puzzles.
+Uses recursive backtracking to solve puzzles.
 
 ##Technologies used
 
