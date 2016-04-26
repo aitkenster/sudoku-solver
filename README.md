@@ -13,7 +13,7 @@ git clone https://github.com/aitkenster/sudoku-solver.git
 [install Go](https://golang.org/doc/install)
 
 ```
-cd photo-mosaic
+cd sudoku-solver
 go get
 go run solver.go PUZZLE_STRING
 ```
