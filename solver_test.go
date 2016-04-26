@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestValidGrid(t *testing.T) {
 	tests := []struct {
@@ -24,7 +27,7 @@ func TestValidGrid(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := Valid(test.grid)
+		actual := valid(test.grid)
 		if actual != test.expected {
 			t.Errorf("expected %b for grid %#v, but got %b",
 				test.expected, test.grid, actual)
@@ -64,20 +67,27 @@ func TestTransformIntoGrid(t *testing.T) {
 }
 
 func TestSimpleSolve(t *testing.T) {
-	gridInput := "000008070060003090092000058400760000001004000000200000100807000003090000500006400"
-	valGrid, err := transformIntoGrid(gridInput)
-	if err != nil {
-		t.Fatalf("expected valid grid, got:", err)
-	}
-	expected := "315928674864573192792641358438769521251384967976215843149857236683492715527136489"
-
-	actual, err := valGrid.simpleSolve()
-	if err != nil {
-		t.Fatalf("expected solution, got:", err)
+	testCases := []struct {
+		puzzle   string
+		solution string
+	}{
+		{
+			"000008070060003090092000058400760000001004000000200000100807000003090000500006400",
+			"315928674864573192792641358438769521251384967976215843149857236683492715527136489",
+		},
 	}
 
-	if actual != expected {
-		t.Fatalf("expected %#v, got %#v", expected, actual)
+	for _, test := range testCases {
+		actual, _ := transformIntoGrid(test.puzzle)
+		expected, _ := transformIntoGrid(test.solution)
+
+		if err := actual.simpleSolve(); err != nil {
+			t.Fatalf("expected solution, got:", err)
+		}
+
+		if !reflect.DeepEqual(actual.Cells, expected.Cells) {
+			t.Fatalf("expected %#v, got %#v", expected, actual)
+		}
 	}
 
 }
