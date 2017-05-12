@@ -1,14 +1,14 @@
-#Sudoku Solver
+# Sudoku Solver
 
 Uses recursive backtracking to solve puzzles.
 
-###Technologies used
+### Technologies used
 
 Golang(core packages)
 
 git clone https://github.com/aitkenster/sudoku-solver.git
 
-###How to run it
+### How to run it
 
 [install Go](https://golang.org/doc/install)
 
